@@ -1,0 +1,122 @@
+import requests
+
+
+# API Authentication
+def get_access_token():
+    url = 'https://simple-books-api.glitch.me/api-clients/'
+    payload = {
+        "clientName": "balumoolya1",  # replace with your client name
+        "clientEmail": "balumoolya1@example.com"  # replace with your email
+    }
+
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 201:
+        print("Access token retrieved successfully!")
+        return response.json()["accessToken"]
+    else:
+        print(f"Failed to get access token: {response.status_code}, {response.text}")
+        return None
+
+
+token = get_access_token()
+
+
+def submit_order(token):
+    url = 'https://simple-books-api.glitch.me/orders'
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    payload = {
+        "bookId": 1,  # assuming bookId 1 exists
+        "customerName": "Balasubramanyam M V"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code == 201:
+        print("Order created successfully!")
+        response_data = response.json()
+        print("Response Data:", response_data)  # Print the response to check what it contains
+        return response_data
+    else:
+        print(f"Failed to create order: {response.status_code}, {response.text}")
+        return None
+
+
+def update_order(token, order_id):
+    if not order_id:
+        print("Error: No order ID provided.")
+        return
+
+    url = f'https://simple-books-api.glitch.me/orders/{order_id}'
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    payload = {
+        "customerName": "Sachin"
+    }
+
+    response = requests.patch(url, headers=headers, json=payload)
+
+    if response.status_code == 204:
+        print("Order updated successfully!")
+    else:
+        print(f"Failed to update order: {response.status_code}, {response.text}")
+
+# Get access token
+token = get_access_token()
+
+# Submit an order
+order_response = submit_order(token)
+
+# Check if 'id' exists in the order response and then update the order
+if order_response and 'id' in order_response:
+    update_order(token, order_response['id'])
+else:
+    print("Order ID not found in the response.")
+
+
+def get_order(token, order_id):
+    if not order_id:
+        print("Error: No order ID provided.")
+        return
+
+    url = f'https://simple-books-api.glitch.me/orders/{order_id}'
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        print("Order retrieved successfully!")
+        response_data = response.json()
+        print("Order Details:", response_data)  # Print the order details for debugging
+        return response_data
+    else:
+        print(f"Failed to retrieve order: {response.status_code}, {response.text}")
+        return None
+
+
+def delete_order(token, order_id):
+    url = f'https://simple-books-api.glitch.me/orders/{order_id}'
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
+
+    response = requests.delete(url, headers=headers)
+
+    if response.status_code == 204:
+        print("Order deleted successfully!")
+    else:
+        print(f"Failed to delete order: {response.status_code}, {response.text}")
+
+
+if order_response:
+    delete_order(token, order_response['id'])
+
+
+
